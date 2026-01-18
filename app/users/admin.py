@@ -5,5 +5,5 @@ from .models import User
 
 @admin.register(User)
 class UserAdmin(admin.ModelAdmin):
-    list_display = ('id', 'username', 'email', 'role', 'rate', 'rates_count')
-    readonly_fields = ('id', 'rate', 'rates_count')
+    list_display = ('id', 'username', 'email', 'role',)
+    readonly_fields = ('id',)
