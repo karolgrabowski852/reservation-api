@@ -3,3 +3,7 @@ Django==4.2.5
 daphne==4.1.2
 psycopg==3.2.2
 psycopg-binary==3.2.2
+djangorestframework-simplejwt==5.3.1
+drf-spectacular==0.29.0
+setuptools
+adrf==0.1.12
