@@ -1,27 +1,25 @@
-from adrf.serializers import ModelSerializer
+from rest_framework import serializers
 from .models import User
 from django.contrib.auth.hashers import make_password
-from rest_framework.fields import IntegerField
 
-class UserSerializer(ModelSerializer):
+class UserSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = User
         fields = ['id', 'username', 'email', 'role', 'first_name', 'last_name']
 
-class SimpleUserSerializer(ModelSerializer):
+class SimpleUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['id', 'username', 'email']
 
 
-class ListUsersSerializer(ModelSerializer):
+class ListUsersSerializer(serializers.Serializer):
     users = SimpleUserSerializer(many=True)
     class Meta:
-        model = User
         fields = ['users']
 
-class CreateUserSerializer(ModelSerializer):
+class CreateUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['username', 'email', 'password', 'role']
@@ -30,15 +28,14 @@ class CreateUserSerializer(ModelSerializer):
             'email': {'required': True},
         }
         
-    async def acreate(self, validated_data):
+    def create(self, validated_data):
         validated_data['password'] = make_password(validated_data.pop('password'))
-        return await super().acreate(validated_data)
+        return super().create(validated_data)
     
 
-class DeleteUserSerializer(ModelSerializer):
-    id = IntegerField(help_text="ID użytkownika")
+class DeleteUserSerializer(serializers.Serializer):
+    id = serializers.IntegerField(help_text="ID użytkownika")
     class Meta:
-        model = User
         fields = ['id']
 
 

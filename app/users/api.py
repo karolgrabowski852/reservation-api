@@ -3,11 +3,11 @@ from rest_framework import permissions
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from .models import User
 from app.permissions import UserIsLandlord, UserIsCustomer
-from adrf.views import APIView
+from rest_framework.views import APIView
 from . import serializers 
 from drf_spectacular.utils import extend_schema, OpenApiParameter
 from drf_spectacular.types import OpenApiTypes
-from asgiref.sync import sync_to_async
+
 class ListUsers(APIView):
     serializer_class = serializers.ListUsersSerializer
     authentication_classes = [JWTAuthentication]
@@ -16,9 +16,9 @@ class ListUsers(APIView):
     @extend_schema(
             responses={200: serializers.ListUsersSerializer}
         )
-    async def get(self, request, format=None):
-        query_set = [user async for user in User.objects.all()]
-        user_data = await self.serializer_class({"users":query_set}).adata
+    def get(self, request, format=None):
+        query_set = User.objects.all()
+        user_data = self.serializer_class({"users":query_set}).data
         return Response(user_data)
     
 
@@ -39,7 +39,7 @@ class GetUserProfile(APIView):
             ],
             responses={200: serializers.UserSerializer}
         )
-    async def get(self, request, format=None):
+    def get(self, request, format=None):
         user_id = request.query_params.get("id")
         current_user = request.user
         if current_user.role in [User.Role.LANDLORD, User.Role.CUSTOMER] and str(current_user.id) != user_id:
@@ -47,11 +47,11 @@ class GetUserProfile(APIView):
 
         user = request.user
         try:
-            user = await User.objects.aget(id=user_id)
+            user = User.objects.get(id=user_id)
         except (User.DoesNotExist, ValueError):
             return Response({"detail": "User not found."}, status=404)
         
-        user_data = await self.serializer_class(user).adata
+        user_data = self.serializer_class(user).data
         return Response(user_data)
 
 
@@ -71,11 +71,11 @@ class DeleteUser(APIView):
             ],
             responses={201: None, 400: None, 404: None}
         )
-    async def delete(self, request):
+    def delete(self, request):
         user_id = request.query_params.get("id")
         try:
-            user = await User.objects.aget(id=user_id)
-            await user.adelete()
+            user = User.objects.get(id=user_id)
+            user.delete()
             return Response(status=201)
         except User.DoesNotExist:
             return Response(status=404)
@@ -89,10 +89,10 @@ class CreateUser(APIView):
             request=serializers.CreateUserSerializer,
             responses={201: serializers.UserSerializer, 400: None}
         )
-    async def post(self, request):
+    def post(self, request):
         serializer = self.serializer_class(data=request.data)
-        if await sync_to_async(serializer.is_valid)():
-            user = await serializer.asave()
-            return Response({"user": await serializers.UserSerializer(user).adata}, status=201)
+        if serializer.is_valid():
+            user = serializer.save()
+            return Response({"user": serializers.UserSerializer(user).data}, status=201)
         else:
             return Response(serializer.errors, status=400)
