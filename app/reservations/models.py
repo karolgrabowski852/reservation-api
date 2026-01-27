@@ -22,7 +22,7 @@ class Reservation(models.Model):
         CANCELLED = 'CANCELLED', 'Cancelled'
     
     user = models.ForeignKey('users.User', on_delete=models.CASCADE)
-    accommodation = models.ForeignKey(Accommodation, on_delete=models.CASCADE)
+    accommodation = models.ForeignKey(Accommodation, on_delete=models.CASCADE, null=True, blank=True)
     reservation_date = models.DateTimeField()
     status = models.CharField(max_length=20, choices=Status.choices)
 

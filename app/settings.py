@@ -33,8 +33,7 @@ ALLOWED_HOSTS = []
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 INSTALLED_APPS = [
-    "daphne",
-    'adrf',
+    "gunicorn",
     'rest_framework',
     'rest_framework_simplejwt',
     'drf_spectacular',
